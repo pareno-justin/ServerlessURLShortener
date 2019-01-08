@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+	<html>
+	  <head>
+		<meta charset="UTF-8">
+		<title>svrls url shortener</title>
+	  </head>
+	  <body>
+		enter long url: <input type="text" id="longURL">   <button type="button" id="submitButton">Submit</button><br>
+	
+		<div id="resultsDiv" style="display:none"></div>
+		<script type="text/javascript">
+			var httpRequest;
+			document.getElementById("submitButton").addEventListener('click', makeRequest);
+		
+			function makeRequest() {
+				var longURL = document.getElementById("longURL").value;
+	
+				var sendString = JSON.stringify({
+					"LongURL": longURL,
+				})
+	
+				httpRequest = new XMLHttpRequest();
+				if(!httpRequest) {
+					alert('Cannot create an XMLHTTP instance');
+					return false
+				}
+	
+				httpRequest.onreadystatechange = displayLink;
+				httpRequest.open('POST', 'https://go.svrls.de/create', true);
+				httpRequest.setRequestHeader('Content-Type', 'application/json');
+				httpRequest.send(sendString);
+	
+				function displayLink() {
+					if (httpRequest.readyState == XMLHttpRequest.DONE) {
+						if (httpRequest.status == 200) {
+								document.getElementById("resultsDiv").style.display = "block";
+								json = JSON.parse(httpRequest.responseText);
+								document.getElementById("resultsDiv").innerHTML = "<a href='" + json.ShortURL + "'>" + json.ShortURL + "</a>";
+						}
+					}
+				}
+			}
+		
+		
+		
+		
+		
+		</script>
+	  </body>
+	</html>
