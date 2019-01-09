@@ -45,9 +45,18 @@ func handleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 		return respond500(err), err
 	}
 
+	//Check that longURLMap["LongURL"] exists, otherwise return 400
+	if _, ok := longURLMap["LongURL"]; !ok {
+		return respond400("invalid request, please use LongURL json field"), nil
+	}
+
 	shortCode, err := getUniqueCode(svc)
 
-	sendToDynamo := newRecord{ID: shortCode, LongURL: longURLMap["LongURL"]}
+	sendToDynamo := newRecord{
+		ID:      shortCode,
+		LongURL: longURLMap["LongURL"],
+	}
+
 	err = writeToDynamo(sendToDynamo, svc)
 	if err != nil {
 		return respond500(err), err
@@ -134,5 +143,15 @@ func respond200(respbody string) events.APIGatewayProxyResponse {
 	resp.Headers = make(map[string]string)
 	resp.Headers["Access-Control-Allow-Origin"] = "*"
 	resp.Headers["Content-Type"] = "application/json"
+	return resp
+}
+
+func respond400(respbody string) events.APIGatewayProxyResponse {
+	var resp events.APIGatewayProxyResponse
+	resp.StatusCode = 400
+	resp.Headers = make(map[string]string)
+	resp.Headers["Access-Control-Allow-Origin"] = "*"
+	resp.Headers["Content-Type"] = "text/html"
+	resp.Body = respbody
 	return resp
 }
