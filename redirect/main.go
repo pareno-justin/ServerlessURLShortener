@@ -13,6 +13,13 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
+func init() {
+	svc = dynamodb.New(session.New())
+
+}
+
+var svc *dynamodb.DynamoDB
+
 type urlID struct {
 	ID string `json:"ID"`
 }
@@ -39,8 +46,6 @@ func main() {
 }
 
 func getFromDynamo(shortcode string) (string, error) {
-	svc := dynamodb.New(session.New())
-
 	request, err := dynamodbattribute.MarshalMap(map[string]string{"ID": shortcode})
 	if err != nil {
 		log.Print(fmt.Sprintf("failed to DynamoDB marshal Record, %v", err))

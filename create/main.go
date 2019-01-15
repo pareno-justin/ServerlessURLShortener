@@ -18,7 +18,11 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+	svc = dynamodb.New(session.New())
+
 }
+
+var svc *dynamodb.DynamoDB
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
@@ -36,8 +40,6 @@ type newRecord struct {
 }
 
 func handleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	svc := dynamodb.New(session.New())
-
 	//Unmarshal request Body into a map
 	var longURLMap map[string]string
 	err := json.Unmarshal([]byte(req.Body), &longURLMap)
@@ -57,7 +59,7 @@ func handleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 		LongURL: longURLMap["LongURL"],
 	}
 
-	err = writeToDynamo(sendToDynamo, svc)
+	err = sendToDynamo.writeToDynamo(svc)
 	if err != nil {
 		return respond500(err), err
 	}
@@ -67,7 +69,7 @@ func handleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	return respond200(string(respBody)), nil
 }
 
-func writeToDynamo(jsonIN newRecord, svc *dynamodb.DynamoDB) error {
+func (jsonIN newRecord) writeToDynamo(svc *dynamodb.DynamoDB) error {
 	av, err := dynamodbattribute.MarshalMap(jsonIN)
 	if err != nil {
 		log.Print(err)
