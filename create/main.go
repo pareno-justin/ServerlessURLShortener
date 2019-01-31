@@ -44,7 +44,7 @@ func handleRequest(req events.APIGatewayProxyRequest) (events.APIGatewayProxyRes
 	var longURLMap map[string]string
 	err := json.Unmarshal([]byte(req.Body), &longURLMap)
 	if err != nil {
-		return respond500(err), err
+		return respond500(err), nil
 	}
 
 	//Check that longURLMap["LongURL"] exists, otherwise return 400
